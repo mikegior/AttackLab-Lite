@@ -16,10 +16,10 @@ vm_cdrom_type               = "sata"
 builder_username            = "root"
 builder_password            = "P@ssW0rd1!"
 
-#ISO URL - CentOS 8 Stream DVD (12/2022) - http://mirror.datto.com/CentOS/8-stream/isos/x86_64/
-os_iso_url                  = "http://mirror.datto.com/CentOS/8-stream/isos/x86_64/CentOS-Stream-8-x86_64-20221222-dvd1.iso"
-os_iso_checksum             = "93bf47db3b7c0af1580b5bdcb754ee6d67e2a1c2f0e8b4604f9f3d4748547c01"
+#ISO URL - CentOS 8 Stream DVD (6/1/2023) - http://mirror.datto.com/CentOS/8-stream/isos/x86_64/
+os_iso_url                  = "http://mirror.datto.com/CentOS/8-stream/isos/x86_64/CentOS-Stream-8-20230523.0-x86_64-dvd1.iso"
+os_iso_checksum             = "9eccffc5384474a3f79d1538a4958325e622081cdbab58fd6c947d20fe2c9405"
 
 #Path to OS ISO on VM Host's Datastore
-#os_iso_path               = "[Datastire] ISO/CentOS-Stream-8-x86_64-20221222-dvd1.iso"
-#os_iso_checksum           = "93bf47db3b7c0af1580b5bdcb754ee6d67e2a1c2f0e8b4604f9f3d4748547c01"
+#os_iso_path               = "[Datastore] ISO/CentOS-Stream-8-20230523.0-x86_64-dvd1.iso"
+#os_iso_checksum           = "9eccffc5384474a3f79d1538a4958325e622081cdbab58fd6c947d20fe2c9405"
