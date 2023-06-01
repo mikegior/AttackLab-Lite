@@ -179,8 +179,8 @@ variable "vm_notes" {
 
 source "vsphere-iso" "win10-pro" {
     vcenter_server       = var.vsphere_ip
-    username             = var.vsphere_user
-    password             = var.vsphere_pass
+    username             = var.vsphere_username
+    password             = var.vsphere_password
     insecure_connection  = true
 
     datacenter           = var.vsphere_dc
