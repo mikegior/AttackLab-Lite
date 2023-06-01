@@ -1,0 +1,70 @@
+---
+- name: Disable IPv6
+  win_shell: reg add HKLM\SYSTEM\CurrentControlSet\Services\Tcpip6\Parameters /v DisabledComponents /t REG_DWORD /d 255 /f
+
+- name: Create LabFiles folder in C:\
+  win_file:
+    path: C:\LabFiles\
+    state: directory
+
+- name: Install Chocolatey for Package Management
+  win_chocolatey:
+    name:
+      - chocolatey
+      - chocolatey-core.extension
+    state: present
+
+- name: Install bginfo
+  win_chocolatey:
+    name: bginfo
+    state: present
+
+- name: Copy bginfo Configuration File
+  win_copy:
+    src: "files/lab_bginfo.bgi"
+    dest: C:\LabFiles\lab_bginfo.bgi
+
+- name: Copy bginfo Startup Script
+  win_copy:
+    src: "files/bginfo.bat"
+    dest: "C:\\ProgramData\\Microsoft\\Windows\\Start Menu\\Programs\\Startup\\bginfo.bat"
+
+- name: Start bginfo with Configuration
+  win_shell: C:\ProgramData\chocolatey\bin\Bginfo64.exe C:\LabFiles\lab_bginfo.bgi /SILENT /NOLICPROMPT /TIMER:0
+
+- name: Install Sysmon
+  win_chocolatey:
+    name: sysmon
+    state: present
+
+- name: Copy Sysmon Configuration File (@SwiftOnSecurity)
+  win_copy:
+    src: "files/sysmon.xml"
+    dest: C:\LabFiles\sysmon.xml
+
+- name: Install, Configure, and Enable Sysmon64
+  win_shell: C:\ProgramData\chocolatey\bin\Sysmon64.exe -accepteula -i C:\LabFiles\sysmon.xml
+  ignore_errors: yes
+
+- name: Install Sysinternals Suite
+  win_chocolatey:
+    name: sysinternals
+    state: present
+
+- name: Create Sysinternals Shortcut
+  win_shortcut:
+    src: C:\ProgramData\chocolatey\lib\sysinternals\tools
+    dest: C:\LabFiles\Sysinternals.lnk
+
+- name: Download Elastic Agent ({{ latest_agent_version }})
+  win_get_url:
+    url: https://artifacts.elastic.co/downloads/beats/elastic-agent/elastic-agent-{{ latest_agent_version }}-windows-x86_64.zip
+    dest: C:\LabFiles\elastic-agent-{{ latest_agent_version }}-windows-x86_64.zip
+
+- name: Extract Elastic Agent ZIP Archive
+  win_shell: Expand-Archive -LiteralPath 'C:\LabFiles\elastic-agent-{{ latest_agent_version }}-windows-x86_64.zip' -DestinationPath C:\LabFiles\
+
+- name: Delete Elastic Agent ZIP File
+  win_file:
+    path: C:\LabFiles\elastic-agent-{{ latest_agent_version }}-windows-x86_64.zip
+    state: absent

@@ -1,0 +1,19 @@
+---
+- name: Join client to Attack Lab Domain ({{ lab_domain_name }})
+  win_domain_membership:
+    dns_domain_name: "{{ lab_domain_name }}"
+    domain_admin_user: administrator@{{ lab_domain_name }}
+    domain_admin_password: P@ssW0rd1!
+    state: domain
+  register: domain_state
+
+- name: Restart Client
+  win_reboot:
+    msg: "Client joined to Active Directory - rebooting..."
+    pre_reboot_delay: 10
+  when: domain_state.reboot_required
+
+- name: Waiting for reconnect after reboot...
+  wait_for_connection:
+    delay: 60
+    timeout: 1800

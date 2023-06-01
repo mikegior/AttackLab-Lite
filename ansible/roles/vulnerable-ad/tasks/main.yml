@@ -1,0 +1,24 @@
+---
+- name: Sleep for 5 minutes post-AD Install
+  pause:
+    minutes: 5
+
+- name: Copy 'Vulnerable-AD.ps1' to C:\LabFiles
+  copy:
+    src: "files/Vulnerable-AD.ps1"
+    dest: C:\LabFiles\Vulnerable-AD.ps1
+
+- name: Copy 'LDAP_NULL_Bind.ps1' to C:\LabFiles
+  copy:
+    src: "files/LDAP_NULL_Bind.ps1"
+    dest: C:\LabFiles\LDAP_NULL_Bind.ps1
+
+- name: Make LDAP NULL Bind Possible
+  win_shell: C:\\LabFiles\\LDAP_NULL_Bind.ps1
+
+- name: Import VulnAD Module and Invoke-VulnAD
+  win_shell: |
+    Import-Module C:\LabFiles\Vulnerable-AD.ps1
+    Invoke-VulnAD -UsersLimit 100 -DomainName "{{ lab_domain_name }}"
+  ignore_errors: true
+  

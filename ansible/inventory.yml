@@ -1,0 +1,42 @@
+---
+lab_dc:
+  hosts:
+    #labdc01.lab.local
+    192.168.50.200:
+  vars:
+    ansible_user: Administrator
+    ansible_password: P@ssW0rd1!
+    ansible_connection: winrm
+    ansible_winrm_server_cert_validation: ignore
+
+lab_server:
+  hosts:
+    #labsvr01.lab.local
+    192.168.50.100:
+  vars:
+    ansible_user: Administrator
+    ansible_password: P@ssW0rd1!
+    ansible_connection: winrm
+    ansible_winrm_server_cert_validation: ignore
+
+lab_clients:
+  hosts:
+    #win10-01.lab.local
+    192.168.50.50:
+    #win10-02.lab.local
+    192.168.50.51:
+  vars:
+    ansible_user: Administrator
+    ansible_password: P@ssW0rd1!
+    ansible_connection: winrm
+    ansible_winrm_server_cert_validation: ignore
+
+lab_elastic:
+  hosts:
+    #labelk01.lab.local
+    192.168.50.10:
+  vars:
+    ansible_user: root
+    ansible_password: P@ssW0rd1!
+    ansible_connection: ssh
+    ansible_ssh_common_args: '-o StrictHostKeyChecking=no'

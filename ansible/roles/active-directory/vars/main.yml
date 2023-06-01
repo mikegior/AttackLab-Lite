@@ -1,0 +1,4 @@
+lab_domain_name: lab.local
+lab_netbios_name: LAB
+lab_domain_recovery_password: P@ssW0rd1!
+elastic_ip_address: 192.168.50.10

@@ -1,0 +1,34 @@
+---
+- name: Install Active Directory Domain Services (AD DS)
+  win_feature:
+    name: AD-Domain-Services
+    include_management_tools: yes
+    include_sub_features: yes
+    state: present
+  register: adds_installed
+
+- name: Create new Domain in a new Forest ({{ lab_domain_name }})
+  win_domain:
+    dns_domain_name: "{{ lab_domain_name }}"
+    safe_mode_password: "{{ lab_domain_recovery_password }}"
+    install_dns: yes
+    domain_mode: Win2012R2
+    domain_netbios_name: "{{ lab_netbios_name }}"
+    forest_mode: Win2012R2
+    sysvol_path: C:\Windows\SYSVOL
+    database_path: C:\Windows\NTDS
+  register: dc_promo
+
+- name: Restart Server
+  win_reboot:
+    msg: "Active Directory installed via Ansible - rebooting..."
+    pre_reboot_delay: 10
+  when: dc_promo
+
+- name: Waiting for reconnect after reboot...
+  wait_for_connection:
+    delay: 60
+    timeout: 1800
+
+- name: Add DNS A record for LABELK01
+  win_shell: Add-DnsServerResourceRecordA -Name labelk01 -ZoneName lab.local -AllowUpdateAny -IPv4Address {{ elastic_ip_address }} -TimeToLive 01:00:00

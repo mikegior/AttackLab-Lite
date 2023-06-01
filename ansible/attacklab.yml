@@ -1,0 +1,27 @@
+- hosts: lab_dc
+  gather_facts: yes
+  roles:
+    - windows-init
+    - active-directory
+    - vulnerable-ad
+  tags: dc
+
+- hosts: lab_server
+  gather_facts: yes
+  roles:
+    - windows-init
+    - join-domain
+  tags: winserver
+
+- hosts: lab_clients
+  gather_facts: yes
+  roles:
+    - windows-init
+    - join-domain
+  tags: clients
+
+- hosts: lab_elastic
+  gather_facts: yes
+  roles:
+    - elasticstack
+  tags: elk

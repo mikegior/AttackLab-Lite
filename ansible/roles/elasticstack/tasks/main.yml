@@ -1,0 +1,165 @@
+---
+- name: Download & Extract Elastic Agent TAR ({{ latest_agent_version }})
+  shell:
+    "cd /root && wget https://artifacts.elastic.co/downloads/beats/elastic-agent/elastic-agent-{{ latest_agent_version }}-linux-x86_64.tar.gz && tar -xzvf elastic-agent-{{ latest_agent_version }}-linux-x86_64.tar.gz"
+
+- name: Delete Elastic Agent TAR File
+  file:
+    path: /root/elastic-agent-{{ latest_agent_version }}-linux-x86_64.tar.gz
+    state: absent
+
+- name: Copy Elastic Repo File
+  copy:
+    src: "files/elasticsearch.repo"
+    dest: /etc/yum.repos.d/elasticsearch.repo
+
+- name: Update /etc/hosts file
+  lineinfile:
+    dest: /etc/hosts
+    regexp: '^127\.0\.0\.1[ \t]+localhost'
+    line: '127.0.0.1 labelk01 localhost'
+
+- name: Add Elasticsearch key
+  shell:
+    "rpm --import https://artifacts.elastic.co/GPG-KEY-elasticsearch"
+
+- name: Install Elasticsearch
+  yum:
+    name: elasticsearch
+    enablerepo: "elasticsearch"
+
+- name: Install Kibana
+  yum:
+    name: kibana
+    enablerepo: "elasticsearch"
+
+- name: Install Logstash
+  yum:
+    name: logstash
+    enablerepo: "elasticsearch"
+
+- name: Modifying elasticsearch.yml (network.host)
+  lineinfile:
+    path: /etc/elasticsearch/elasticsearch.yml
+    regexp: '^#network.host'
+    line: 'network.host: {{ elastic_ip }}'
+
+- name: Modifying elasticsearch.yml (http.port)
+  lineinfile:
+    path: /etc/elasticsearch/elasticsearch.yml
+    regexp: '^#http.port'
+    line: 'http.port: 9200'
+
+- name: Ignore 'cluster.initial_master_nodes' line
+  lineinfile:
+    path: /etc/elasticsearch/elasticsearch.yml
+    regexp: '^cluster.initial_master_nodes'
+    line: '#cluster.initial_master_nodes: ["LABELK01"]'
+
+- name: Modifying elasticsearch.yml (discovery.type)
+  lineinfile:
+    path: /etc/elasticsearch/elasticsearch.yml
+    line: 'discovery.type: single-node'
+
+- name: Modifying kibana.yml (server.port)
+  lineinfile:
+    path: /etc/kibana/kibana.yml
+    regexp: '^#server.port'
+    line: "server.port: 5601"
+
+- name: Modifying kibana.yml (server.host)
+  lineinfile:
+    path: /etc/kibana/kibana.yml
+    regexp: '^#server.host'
+    line: 'server.host: "{{ elastic_ip }}"'
+
+- name: Modifying kibana.yml (server.publicBaseUrl)
+  lineinfile:
+    path: /etc/kibana/kibana.yml
+    regexp: '^#server.publicBaseUrl'
+    line: 'server.publicBaseUrl: "http://{{ elastic_ip }}:5601"'
+
+- name: Modifying kibana.yml (elasticsearch.hosts)
+  lineinfile:
+    path: /etc/kibana/kibana.yml
+    regexp: '^#elasticsearch.hosts'
+    line: 'elasticsearch.hosts: ["http://{{ elastic_ip }}:9200"]'
+
+#- name: Create value for "xpack.encryptedSavedObjects.encryptionKey" (kibana.yml)
+#  lineinfile:
+#    path: /etc/kibana/kibana.yml
+#    create: yes
+#    line: "xpack.encryptedSavedObjects.encryptionKey: ''"
+#    state: present
+
+- name: Copy Logstash configuration file - input-beat.conf
+  copy:
+    src: "files/input-beat.conf"
+    dest: /etc/logstash/conf.d/input-beat.conf
+
+- name: Copy Logstash configuration file - output-elasticsearch.conf
+  copy:
+    src: "files/output-elasticsearch.conf"
+    dest: /etc/logstash/conf.d/output-elasticsearch.conf
+
+- name: Reloading daemons
+  systemd:
+    daemon_reload: yes
+
+- name: Enable Elasticsearch on Startup
+  systemd:
+    name: elasticsearch
+    enabled: yes
+
+- name: Enable Logstash on Startup
+  systemd:
+    name: logstash
+    enabled: yes
+
+- name: Enable Kibana on Startup
+  systemd:
+    name: kibana
+    enabled: yes
+
+- name: Start Elasticsearch Service
+  systemd:
+    name: elasticsearch
+    state: started
+
+- name: Start Logstash Service
+  systemd:
+    name: logstash
+    state: started
+
+- name: Start Kibana Service
+  systemd:
+    name: kibana
+    state: started
+
+- name: Generate Kibana Enrollment Token
+  shell:
+    "/usr/share/elasticsearch/bin/elasticsearch-create-enrollment-token -s kibana --url \"https://{{ elastic_ip }}:9200\""
+  register: enrollment_token
+#- debug:
+#    var: enrollment_token.stdout_lines  
+- set_fact:
+    token={{ enrollment_token.stdout }}
+
+- name: Enroll Kibana in Elasticsearch
+  shell:
+    "/usr/share/kibana/bin/kibana-setup --enrollment-token {{ token }}"
+#  register: enrollment
+#- debug:
+#    var: enrollment.stdout_lines
+
+- name: Reset 'elastic' Password
+  shell:
+    "/usr/share/elasticsearch/bin/elasticsearch-reset-password -u elastic -b"
+  register: elastic_password
+- debug:
+    var: elastic_password.stdout_lines
+
+- name: Restart Kibana Service
+  systemd:
+    name: kibana
+    state: restarted
