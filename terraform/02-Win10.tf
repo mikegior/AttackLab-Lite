@@ -40,7 +40,7 @@ resource "vsphere_virtual_machine" "windows-10" {
 
         #Download and execute ConfigureRemotingforAnsible (WinRM)
         run_once_command_list = [
-          "powershell.exe [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12; Invoke-WebRequest -Uri https://github.com/AlbanAndrieu/ansible-windows/blob/master/files/ConfigureRemotingForAnsible.ps1 -Outfile C:\\WinRM_Ansible.ps1",
+          "powershell.exe [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12; Invoke-WebRequest -Uri https://raw.githubusercontent.com/AlbanAndrieu/ansible-windows/master/files/ConfigureRemotingForAnsible.ps1 -Outfile C:\\WinRM_Ansible.ps1",
           "powershell.exe -ExecutionPolicy Bypass -File C:\\WinRM_Ansible.ps1"
         ]
       }
