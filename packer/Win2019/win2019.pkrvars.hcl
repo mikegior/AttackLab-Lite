@@ -19,7 +19,7 @@ builder_password            = "P@ssW0rd1!"
 #os_iso_url                  = "https://software-download.microsoft.com/download/pr/17763.737.190906-2324.rs5_release_svc_refresh_SERVER_EVAL_x64FRE_en-us_1.iso"
 #os_iso_checksum             = "549bca46c055157291be6c22a3aaaed8330e78ef4382c99ee82c896426a1cee1"
 
-#Path to Windows 10 ISO on VM Host
+#Path to Windows Server 2019 ISO on VM Host
 os_iso_path                 = "[Datastore] ISO/17763.737.190906-2324.rs5_release_svc_refresh_SERVER_EVAL_x64FRE_en-us_1.iso"
 os_iso_checksum             = ""
 
