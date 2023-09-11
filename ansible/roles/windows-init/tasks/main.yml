@@ -7,6 +7,27 @@
     path: C:\LabFiles\
     state: directory
 
+- name: Download .NET Framework 4.8 Offline Installer
+  win_get_url:
+    url: https://download.visualstudio.microsoft.com/download/pr/2d6bb6b2-226a-4baa-bdec-798822606ff1/8494001c276a4b96804cde7829c04d7f/ndp48-x86-x64-allos-enu.exe
+    dest: C:\LabFiles\ndp48-x86-x64-allos-enu.exe
+
+- name: Install .NET Framework 4.8
+  win_package:
+    path: C:\LabFiles\ndp48-x86-x64-allos-enu.exe
+    arguments:
+    - /q
+    - /AcceptEULA
+    - /norestart
+
+- name: Reboot after .NET Framework 4.8 Installation
+  win_reboot:
+    msg: ".NET Framework 4.8 Installation"
+
+- name: Waiting for reconnect after reboot...
+  wait_for_reconnection:
+    timeout: 3600
+
 - name: Install Chocolatey for Package Management
   win_chocolatey:
     name:
